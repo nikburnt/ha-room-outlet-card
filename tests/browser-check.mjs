@@ -1,5 +1,6 @@
 async page => {
   const assert=(value,message) => { if (!value) throw new Error(message); };
+  await page.waitForFunction(() => Boolean(window.demo?.cards?.length));
   const cards=page.locator("room-outlet-card");
   const living=cards.nth(0);
   const office=cards.nth(2);
@@ -80,6 +81,7 @@ async page => {
   await page.getByRole("combobox",{ name:"Язык",exact:true }).selectOption("en");
   assert((await living.locator('[data-kind="energy"] .metric-label').first().textContent()).includes("Energy total"),"English labels");
   await page.reload();
+  await page.waitForFunction(() => Boolean(window.demo?.cards?.length));
   assert(await page.evaluate(() => window.demo.calls.length)===0,"Reload is passive");
   return { rooms:4,outlets:7,widths:[320,390,768,1440],checks:"passed" };
 }

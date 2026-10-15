@@ -63,7 +63,7 @@ for (const config of configs) {
 }
 const editor=document.querySelector("room-outlet-card-editor");
 editor.setConfig({ type:"custom:room-outlet-card",...outletConfigs[0] });
-function update() { const hass={ states:{ ...states },language,locale:{ language },callService }; cards.forEach(card => { card.hass=hass; }); editor.hass=hass; }
+function update() { const hass={ states:{ ...states },language,locale:{ language },callService }; cards.forEach(card => { card.hass=hass; }); editor.hass=hass; window.demo?.onUpdate?.(hass); }
 async function callService(domain,service,data) {
   calls.push({ domain,service,data:structuredClone(data) });
   if (window.demo.failNext) { window.demo.failNext=false; throw new Error("Service unavailable"); }
@@ -94,3 +94,4 @@ document.getElementById("close-info").addEventListener("click",() => document.ge
 editor.addEventListener("config-changed",event => { window.demo.editorChanges.push(structuredClone(event.detail.config)); try { cards[0].setConfig(event.detail.config); } catch { /* An unfinished selection is not a valid card yet. */ } });
 document.addEventListener("hass-more-info",event => { document.getElementById("more-info").textContent=event.detail.entityId; document.getElementById("info-dialog").showModal(); });
 update();
+if (new URL(location.href).searchParams.has("home")) import("./home.js");

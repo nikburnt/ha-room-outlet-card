@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
   <title>Room Outlet Card</title>
   <style>
     :root { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#24292b; background:#f1f3f5; --primary-color:#087d8d; --secondary-text-color:#626f73; --secondary-background-color:#f1f4f5; --divider-color:#dfe5e7; --ha-card-border-radius:8px; }
@@ -41,7 +42,9 @@
   </main>
   <dialog id="editor-dialog"><div class="dialog-header"><h2>Карточка комнаты</h2><button id="close-editor" aria-label="Закрыть редактор" title="Закрыть редактор"><ha-icon icon="mdi:close"></ha-icon></button></div><room-outlet-card-editor></room-outlet-card-editor></dialog>
   <dialog id="info-dialog"><div class="dialog-header"><h2>Entity</h2><button id="close-info" aria-label="Закрыть" title="Закрыть"><ha-icon icon="mdi:close"></ha-icon></button></div><p id="more-info"></p></dialog>
-  <script src="../dist/ha-room-outlet-card.js"></script>
-  <script src="demo.bundle.js"></script>
+  <script type="module">
+    await import("../dist/ha-room-outlet-card.js" + (new URL(location.href).searchParams.has("bootstrap") ? "?home-bootstrap" : ""));
+    await import("./demo.bundle.js");
+  </script>
 </body>
 </html>

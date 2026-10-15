@@ -47,9 +47,69 @@ pending desired state without disabling the toggle. Errors and a 10-second
 confirmation timeout are shown. Click an outlet name or reading for Home
 Assistant's native more-info dialog.
 
-The card can be used on editable dashboards. It does not inject itself into
-Home Assistant's automatic Overview. Native switches and sensors can remain
-grouped under their logical device in room views.
+## Automatic Home Extension
+
+Version 0.2.0 adds an opt-in extension for the built-in Home dashboard's room
+views. It replaces each selected native outlet device section with **one card
+containing its control, power and energy**, not three adjacent entity tiles.
+The dashboard stays automatic; unrelated sections, other dashboards and device
+registries are not rewritten. No entities need to be hidden for this to work.
+
+This uses HA's internal `home-area-view-strategy` generator, not a public card
+replacement API. Currently validated with HA **2026.9.4**. An unvalidated HA
+version, disabled/invalid configuration, settings timeout, unexpected layout,
+or extra actuator/alert in the device section retains HA's native controls.
+Revalidate the adapter before enabling it for another HA version.
+
+Install the bundle through HACS, then load it globally so a direct visit to
+Home works without opening a Lovelace dashboard first:
+
+```yaml
+frontend:
+  # Keep any existing frontend settings, including themes.
+  extra_module_url:
+    - /hacsfiles/ha-room-outlet-card/ha-room-outlet-card.js?home-bootstrap
+```
+
+This one-time frontend setting needs a Core restart. The stable bootstrap
+loads a fresh URL of the installed HACS bundle on each page load, avoiding
+HACS's month-long browser cache. Future HACS bundle upgrades do not require
+editing that URL. The normal HACS Lovelace resource remains registered too;
+both registration and the generator hook are idempotent.
+
+An administrator must explicitly save configuration using HA's WebSocket API:
+
+```json
+{
+  "type": "frontend/set_system_data",
+  "key": "room_outlet_card",
+  "value": {
+    "schema_version": 1,
+    "enabled": true,
+    "outlets": [
+      {
+        "entity": "switch.office_desk_outlet",
+        "name": "Desk Outlet",
+        "power": "sensor.office_desk_outlet_power",
+        "energy": "sensor.office_desk_outlet_shelly_energy"
+      }
+    ]
+  }
+}
+```
+
+This is frontend configuration, not a new HA integration, entity or database.
+It is readable by regular authenticated users, so the Home view also works for
+non-admin household members. Lists are never inferred from areas or guessed
+from entity names. Refresh the browser after changing this configuration.
+For rollback, save the same value with `enabled: false` and refresh. Removing
+the global frontend URL disables automatic loading after the next Core restart.
+Leave the separate normal Lovelace resource installed for editable dashboards.
+
+Read-only browser diagnostics are available at `window.roomOutletCardHome`:
+version, hook status, and the last 20 area generation results. No states, tokens
+or commands are recorded. The extension itself only reads settings and modifies
+generated card configuration; it never calls services or operates devices.
 
 ## Development
 
@@ -60,8 +120,14 @@ npm run build
 npm run check
 ```
 
-Open `preview/index.html` for a standalone mocked Home Assistant preview. It has
-no connection to real devices. Browser checks are in `tests/browser-check.mjs`
+Serve this directory over HTTP (ES modules cannot be opened through `file://`)
+and open `preview/index.html` for a mocked Home Assistant preview. It has no
+connection to real devices. Browser checks are in `tests/browser-check.mjs`
 for Playwright CLI `run-code --filename`. Publish the built
 `dist/ha-room-outlet-card.js` as a GitHub release asset, then install via HACS;
 never patch a live Home Assistant bundle.
+
+`preview/index.html?home` exercises the generator adapter on isolated fixtures;
+`?home&bootstrap` additionally tests the global loader. These are mocked previews,
+not proof of an authenticated live Home render. Browser checks for this path
+are in `tests/home-browser-check.mjs`.

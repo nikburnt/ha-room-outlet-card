@@ -177,7 +177,9 @@ class RoomOutletCardEditor extends LitElement {
   `;
 }
 
-if (!customElements.get("room-outlet-card")) customElements.define("room-outlet-card", RoomOutletCard);
-if (!customElements.get("room-outlet-card-editor")) customElements.define("room-outlet-card-editor", RoomOutletCardEditor);
-window.customCards = window.customCards || [];
-if (!window.customCards.some(card => card.type === "room-outlet-card")) window.customCards.push({ type:"room-outlet-card", name:"Room Outlet Card", preview:true, description:"Outlet controls, power and cumulative energy by room.", documentationURL:"https://github.com/nikburnt/ha-room-outlet-card" });
+export function registerCard() {
+  if (!customElements.get("room-outlet-card")) customElements.define("room-outlet-card", RoomOutletCard);
+  if (!customElements.get("room-outlet-card-editor")) customElements.define("room-outlet-card-editor", RoomOutletCardEditor);
+  window.customCards = window.customCards || [];
+  if (!window.customCards.some(card => card.type === "room-outlet-card")) window.customCards.push({ type:"room-outlet-card", name:"Room Outlet Card", preview:true, description:"Outlet controls, power and cumulative energy by room.", documentationURL:"https://github.com/nikburnt/ha-room-outlet-card" });
+}
