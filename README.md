@@ -76,6 +76,9 @@ loads a fresh URL of the installed HACS bundle on each page load, avoiding
 HACS's month-long browser cache. Future HACS bundle upgrades do not require
 editing that URL. The normal HACS Lovelace resource remains registered too;
 both registration and the generator hook are idempotent.
+The normal Lovelace resource alone only registers the card; it does not patch
+Home or request any extension settings. The global bootstrap is the explicit
+opt-in to installing the hook.
 
 An administrator must explicitly save configuration using HA's WebSocket API:
 

@@ -1,6 +1,7 @@
 async page => {
   const assert=(value,message) => { if (!value) throw new Error(message); };
   await page.waitForFunction(() => Boolean(window.demo?.cards?.length));
+  assert(await page.evaluate(() => window.roomOutletCardHome===undefined),"Normal Lovelace resource does not install a Home hook");
   const cards=page.locator("room-outlet-card");
   const living=cards.nth(0);
   const office=cards.nth(2);

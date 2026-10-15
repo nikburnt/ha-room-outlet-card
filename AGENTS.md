@@ -22,6 +22,8 @@
   imports a fresh installed bundle URL to avoid HACS's long browser cache.
   Keep this bootstrap contract backward-compatible: an old cached bootstrap
   must still fetch a current bundle without registering its cached card code.
+- Loading only the normal Lovelace resource must never install a Home hook or
+  fetch Home settings. That requires the explicit global bootstrap URL.
 - Validate every supported HA version. Unsupported versions, disabled/bad
   settings and unknown layouts must retain native controls. No service calls
   may be issued by the extension, including during load, refresh or fallback.

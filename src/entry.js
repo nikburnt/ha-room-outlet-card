@@ -11,5 +11,5 @@ if (url.searchParams.has("home-bootstrap")) {
   catch (error) { console.warn("Room Outlet Card Home could not load: " + error.message); }
 } else {
   registerCard();
-  installHomeExtension();
+  if (url.searchParams.has("home-build")) installHomeExtension();
 }

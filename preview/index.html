@@ -43,7 +43,8 @@
   <dialog id="editor-dialog"><div class="dialog-header"><h2>Карточка комнаты</h2><button id="close-editor" aria-label="Закрыть редактор" title="Закрыть редактор"><ha-icon icon="mdi:close"></ha-icon></button></div><room-outlet-card-editor></room-outlet-card-editor></dialog>
   <dialog id="info-dialog"><div class="dialog-header"><h2>Entity</h2><button id="close-info" aria-label="Закрыть" title="Закрыть"><ha-icon icon="mdi:close"></ha-icon></button></div><p id="more-info"></p></dialog>
   <script type="module">
-    await import("../dist/ha-room-outlet-card.js" + (new URL(location.href).searchParams.has("bootstrap") ? "?home-bootstrap" : ""));
+    const params = new URL(location.href).searchParams;
+    await import("../dist/ha-room-outlet-card.js" + (params.has("bootstrap") || params.has("home") ? "?home-bootstrap" : ""));
     await import("./demo.bundle.js");
   </script>
 </body>
