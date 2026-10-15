@@ -19,7 +19,8 @@ class RoomOutletCard extends LitElement {
   }
   static getConfigElement() { return document.createElement("room-outlet-card-editor"); }
   static getStubConfig() { return { name: "Outlets", entities: [] }; }
-  getCardSize() { return 1 + (this.config?.entities.length || 0) * 2; }
+  get showHeading() { return Boolean(this.config?.name) || this.config?.entities.length !== 1; }
+  getCardSize() { return (this.showHeading ? 1 : 0) + (this.config?.entities.length || 0) * 2; }
   getGridOptions() { return { columns: 12, min_columns: 6 }; }
   get words() { return wordsFor(this.hass); }
   clearPending() { for (const command of Object.values(this.pending)) clearTimeout(command.timer); this.pending = {}; }
@@ -79,7 +80,7 @@ class RoomOutletCard extends LitElement {
   }
   render() {
     if (!this.config || !this.hass) return nothing;
-    return html`<ha-card><header>${icon(this.config.icon || "mdi:power-socket-eu")}<h2>${this.config.name || this.words.title}</h2></header>
+    return html`<ha-card class=${this.showHeading ? "" : "standalone"}>${this.showHeading ? html`<header>${icon(this.config.icon || "mdi:power-socket-eu")}<h2>${this.config.name || this.words.title}</h2></header>` : nothing}
       <div class="outlets">${this.config.entities.map(item => {
         const state = this.hass.states[item.entity];
         const on = state?.state === "on";
@@ -109,6 +110,7 @@ class RoomOutletCard extends LitElement {
     h2 { font-size:17px; line-height:1.4; font-weight:600; margin:0; overflow-wrap:anywhere; }
     .outlets { padding:0 18px; }
     .outlet { padding:14px 0; border-top:1px solid var(--divider-color,#dfe5e7); }
+    .standalone .outlet { border-top:0; }
     .control { display:flex; align-items:center; gap:10px; min-height:48px; }
     .icon-button { width:44px; height:44px; padding:10px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .socket { background:var(--secondary-background-color,#f2f5f6); color:var(--secondary-text-color,#69787d); }

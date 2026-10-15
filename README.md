@@ -1,7 +1,7 @@
 # Room Outlet Card
 
-A Home Assistant dashboard card with one row per outlet: a switch, current power
-in W, and cumulative energy in kWh. Group cards by room and explicitly select the
+A Home Assistant dashboard card for an individual outlet: a switch, current power
+in W, and cumulative energy in kWh. Group separate cards by room and explicitly select the
 public logical outlet entities, not duplicate physical integrations.
 
 ## Install
@@ -12,7 +12,6 @@ download it. If HACS has not added the resource automatically, add
 
 ```yaml
 type: custom:room-outlet-card
-name: Office
 entities:
   - entity: switch.office_desk_outlet
     name: Desk Outlet
@@ -20,9 +19,14 @@ entities:
     energy: sensor.office_desk_outlet_shelly_energy
 ```
 
-Every row requires explicit `entity` (switch), `power` (sensor) and `energy`
-(sensor). `name` and `icon` are optional overrides; the card also accepts a room
-`icon`. The visual editor supports entity selection and row ordering. No devices
+Use one entity item per card for one independent outlet element. With one outlet
+and no top-level `name`, there is no redundant room heading inside the card.
+Put the room name in the dashboard section heading, outside the outlet cards.
+Existing multi-outlet configurations remain supported for compatibility.
+
+Every item requires explicit `entity` (switch), `power` (sensor) and `energy`
+(sensor). `name` and `icon` are optional item overrides; a top-level `name` adds
+an optional card heading. The visual editor supports entity selection and row ordering. No devices
 are discovered or added automatically. The card follows Home Assistant's theme
 and supports English and Russian.
 

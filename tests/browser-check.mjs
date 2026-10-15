@@ -2,8 +2,10 @@ async page => {
   const assert=(value,message) => { if (!value) throw new Error(message); };
   const cards=page.locator("room-outlet-card");
   const living=cards.nth(0);
-  const office=cards.nth(1);
-  assert(await cards.count()===4,"Four preview rooms");
+  const office=cards.nth(2);
+  assert(await page.locator(".room").count()===4,"Four preview rooms");
+  assert(await cards.count()===7,"One independent card per outlet");
+  assert(await cards.evaluateAll(elements => elements.every(card => card.shadowRoot.querySelectorAll(".outlet").length===1 && !card.shadowRoot.querySelector("header"))),"Standalone outlets have no room heading or multi-outlet list");
   assert(await page.evaluate(() => window.demo.calls.length)===0,"Rendering is passive");
   assert((await office.locator('[data-kind="power"] .reading').first().textContent()).includes("245"),"kW is converted to W");
   await living.getByRole("switch",{ name:"TV Wall Outlet",exact:true }).click();
@@ -45,6 +47,7 @@ async page => {
   await living.locator('[data-kind="energy"]').first().click();
   assert(await page.locator("#more-info").textContent()==="sensor.living_room_tv_energy","Reading opens exact sensor");
   await page.getByRole("button",{ name:"Закрыть",exact:true }).click();
+  await page.evaluate(() => window.demo.editor.setConfig({ type:"custom:room-outlet-card",...window.demo.configs[0] }));
   await page.getByRole("button",{ name:"Редактор карточки",exact:true }).click();
   const editor=page.locator("room-outlet-card-editor");
   await editor.getByRole("textbox",{ name:"Название",exact:true }).first().fill("A Very Long Room Name To Verify Layout");
@@ -58,6 +61,8 @@ async page => {
   assert(await page.evaluate(() => window.demo.editorChanges.at(-1).entities[0].entity)==="switch.living_room_lodge_outlet","Editor changes order");
   assert(await page.evaluate(() => window.demo.calls.length)===0,"Editing is passive");
   await page.getByRole("button",{ name:"Закрыть редактор",exact:true }).click();
+  await page.evaluate(() => window.demo.reset());
+  assert(await cards.evaluateAll(elements => elements.every(card => card.shadowRoot.querySelectorAll(".outlet").length===1)),"Each outlet remains an independent card");
 
   for (const width of [320,390,768,1440]) {
     await page.setViewportSize({ width,height:1000 });
@@ -76,5 +81,5 @@ async page => {
   assert((await living.locator('[data-kind="energy"] .metric-label').first().textContent()).includes("Energy total"),"English labels");
   await page.reload();
   assert(await page.evaluate(() => window.demo.calls.length)===0,"Reload is passive");
-  return { rooms:4,widths:[320,390,768,1440],checks:"passed" };
+  return { rooms:4,outlets:7,widths:[320,390,768,1440],checks:"passed" };
 }

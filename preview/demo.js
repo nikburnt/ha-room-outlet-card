@@ -45,9 +45,24 @@ configs.flatMap(config => config.entities).forEach((item,index) => {
 let states=structuredClone(baseline);
 let language="ru";
 const calls=[];
-const cards=configs.map(config => { const card=document.createElement("room-outlet-card"); card.setConfig(config); document.getElementById("cards").append(card); return card; });
+const outletConfigs=configs.flatMap(config => config.entities.map(item => ({ entities:[item] })));
+const cards=[];
+for (const config of configs) {
+  const room=document.createElement("section");
+  room.className="room";
+  const heading=document.createElement("h2");
+  heading.textContent=config.name;
+  room.append(heading);
+  for (const item of config.entities) {
+    const card=document.createElement("room-outlet-card");
+    card.setConfig({ entities:[item] });
+    room.append(card);
+    cards.push(card);
+  }
+  document.getElementById("cards").append(room);
+}
 const editor=document.querySelector("room-outlet-card-editor");
-editor.setConfig({ type:"custom:room-outlet-card",...configs[0] });
+editor.setConfig({ type:"custom:room-outlet-card",...outletConfigs[0] });
 function update() { const hass={ states:{ ...states },language,locale:{ language },callService }; cards.forEach(card => { card.hass=hass; }); editor.hass=hass; }
 async function callService(domain,service,data) {
   calls.push({ domain,service,data:structuredClone(data) });
@@ -57,10 +72,10 @@ async function callService(domain,service,data) {
   states[data.entity_id]=state(data.entity_id,service==="turn_on" ? "on":"off",states[data.entity_id].attributes);
   update();
 }
-window.demo={ calls,cards,configs,failNext:false,stall:false,delay:250,editorChanges:[],
+window.demo={ calls,cards,configs,editor,failNext:false,stall:false,delay:250,editorChanges:[],
   setState(id,value,attributes={}) { states[id]=state(id,value,{ ...states[id]?.attributes,...attributes }); update(); },
   getState(id) { return structuredClone(states[id]); },
-  reset() { states=structuredClone(baseline); calls.length=0; this.failNext=false; this.stall=false; this.delay=250; cards.forEach((card,index) => card.setConfig(configs[index])); update(); }
+  reset() { states=structuredClone(baseline); calls.length=0; this.failNext=false; this.stall=false; this.delay=250; cards.forEach((card,index) => card.setConfig(outletConfigs[index])); update(); }
 };
 document.getElementById("theme").addEventListener("click",() => document.body.classList.toggle("dark"));
 document.getElementById("language").addEventListener("change",event => { language=event.target.value; update(); });
