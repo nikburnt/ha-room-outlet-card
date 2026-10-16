@@ -20,7 +20,7 @@ class RoomOutletCard extends LitElement {
   static getConfigElement() { return document.createElement("room-outlet-card-editor"); }
   static getStubConfig() { return { name: "Outlets", entities: [] }; }
   get showHeading() { return Boolean(this.config?.name) || this.config?.entities.length !== 1; }
-  getCardSize() { return (this.showHeading ? 1 : 0) + (this.config?.entities.length || 0) * 2; }
+  getCardSize() { return (this.showHeading ? 1 : 0) + (this.config?.entities.length || 0); }
   getGridOptions() { return { columns: 12, min_columns: 6 }; }
   get words() { return wordsFor(this.hass); }
   clearPending() { for (const command of Object.values(this.pending)) clearTimeout(command.timer); this.pending = {}; }
@@ -74,7 +74,7 @@ class RoomOutletCard extends LitElement {
     const text = result.text === null ? this.words[result.status] : result.text;
     return html`<button class="metric ${result.status !== "ok" ? "missing" : ""}" type="button"
       data-kind=${kind} title=${this.words.more + ": " + this.words[kind]} @click=${() => this.moreInfo(item[kind])}>
-      <span class="metric-label">${icon(kind === "power" ? "mdi:flash-outline" : "mdi:counter")}${this.words[kind]}</span>
+      ${icon(kind === "power" ? "mdi:flash-outline" : "mdi:counter")}<span class="metric-label sr-only">${this.words[kind]}</span>
       <span class="reading">${text}${result.text === null ? nothing : html`<span class="unit">${result.unit}</span>`}</span>
     </button>`;
   }
@@ -88,11 +88,11 @@ class RoomOutletCard extends LitElement {
           <div class="control">
             <button type="button" class="socket icon-button ${on ? "on" : ""}" title=${this.words.more + ": " + this.name(item)} aria-label=${this.words.more + ": " + this.name(item)} @click=${() => this.moreInfo(item.entity)}>${icon(item.icon || "mdi:power-socket-eu")}</button>
             <div class="label"><button type="button" class="name" @click=${() => this.moreInfo(item.entity)}>${this.name(item)}</button>
-              <div class="status" id=${item.entity + "-status"} aria-live="polite">${this.status(item.entity)}</div></div>
+              <div class="metrics">${this.metric(item, "power")}${this.metric(item, "energy")}</div>
+              <div class=${"status" + (controllable(state) && !this.pending[item.entity] ? " sr-only" : "")} id=${item.entity + "-status"} aria-live="polite">${this.status(item.entity)}</div></div>
             <button type="button" role="switch" class="toggle ${on ? "checked" : ""}" aria-checked=${String(on)} aria-label=${this.name(item)} aria-describedby=${item.entity + "-status"}
               title=${(nextPower(state, this.pending[item.entity]) ? this.words.turnOn : this.words.turnOff) + ": " + this.name(item)} ?disabled=${!controllable(state)} @click=${() => this.toggle(item.entity)}><span class="track"><span class="thumb"></span></span></button>
           </div>
-          <div class="metrics">${this.metric(item, "power")}${this.metric(item, "energy")}</div>
           ${this.errors[item.entity] ? html`<div class="error" role="alert">${this.errors[item.entity]}</div>` : nothing}
         </section>`;
       })}</div></ha-card>`;
@@ -105,33 +105,33 @@ class RoomOutletCard extends LitElement {
     button:focus-visible { outline:2px solid var(--primary-color,#087d8d); outline-offset:2px; }
     button:disabled { opacity:.4; cursor:default; }
     ha-icon { display:inline-flex; width:22px; height:22px; --mdc-icon-size:22px; flex-shrink:0; }
-    header { display:flex; align-items:center; gap:12px; padding:18px; min-width:0; }
+    header { display:flex; align-items:center; gap:12px; padding:12px; min-width:0; }
     header ha-icon { color:var(--secondary-text-color,#69787d); }
     h2 { font-size:17px; line-height:1.4; font-weight:600; margin:0; overflow-wrap:anywhere; }
-    .outlets { padding:0 18px; }
-    .outlet { padding:14px 0; border-top:1px solid var(--divider-color,#dfe5e7); }
+    .outlets { padding:0 12px; }
+    .outlet { padding:8px 0; border-top:1px solid var(--divider-color,#dfe5e7); }
     .standalone .outlet { border-top:0; }
-    .control { display:flex; align-items:center; gap:10px; min-height:48px; }
+    .control { display:flex; align-items:center; gap:8px; min-height:44px; }
     .icon-button { width:44px; height:44px; padding:10px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .socket { background:var(--secondary-background-color,#f2f5f6); color:var(--secondary-text-color,#69787d); }
     .socket.on { color:var(--primary-color,#087d8d); }
     .label { flex:1; min-width:0; }
-    .name { display:block; padding:0; width:100%; text-align:left; font-size:14px; line-height:1.5; font-weight:600; overflow-wrap:anywhere; }
+    .name { display:block; padding:0; width:100%; text-align:left; font-size:14px; line-height:1.4; font-weight:600; overflow-wrap:anywhere; }
     .status { min-height:20px; font-size:12px; line-height:1.7; color:var(--secondary-text-color,#69787d); overflow-wrap:anywhere; }
     .toggle { width:48px; height:44px; padding:0; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
     .track { width:40px; height:24px; padding:3px; border:1px solid var(--secondary-text-color,#69787d); border-radius:14px; background:var(--secondary-background-color,#f2f5f6); }
     .thumb { display:block; width:16px; height:16px; border-radius:50%; background:var(--secondary-text-color,#69787d); transition:transform .15s ease; }
     .checked .track { background:var(--primary-color,#087d8d); border-color:var(--primary-color,#087d8d); }
     .checked .thumb { background:#fff; transform:translateX(16px); }
-    .metrics { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; padding:10px 0 0 54px; }
-    .metric { display:block; text-align:left; padding:2px 0; min-width:0; border-radius:2px; }
-    .metric-label { display:flex; gap:4px; align-items:center; color:var(--secondary-text-color,#69787d); font-size:11px; line-height:1.5; overflow-wrap:anywhere; }
-    .metric-label ha-icon { width:14px; height:14px; --mdc-icon-size:14px; }
-    .reading { display:block; font-size:17px; line-height:1.6; font-weight:500; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-    .unit { color:var(--secondary-text-color,#69787d); font-size:12px; margin-left:5px; font-weight:400; }
+    .metrics { display:flex; flex-wrap:wrap; gap:0 14px; min-height:24px; }
+    .metric { display:inline-flex; align-items:center; gap:4px; text-align:left; padding:0; min-width:0; max-width:100%; min-height:24px; border-radius:2px; }
+    .metric ha-icon { width:14px; height:14px; --mdc-icon-size:14px; color:var(--secondary-text-color,#69787d); }
+    .reading { font-size:13px; line-height:1.5; font-weight:500; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+    .unit { color:var(--secondary-text-color,#69787d); font-size:11px; margin-left:3px; font-weight:400; }
     .missing .reading { color:var(--secondary-text-color,#69787d); font-size:12px; }
-    .error { padding:8px 0 0 54px; color:var(--error-color,#be3a3a); font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
-    @media(max-width:360px) { header { padding:14px 12px; } .outlets { padding:0 12px; } .control { gap:7px; } .metrics,.error { padding-left:0; } }
+    .error { padding:4px 0 0 52px; color:var(--error-color,#be3a3a); font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+    .sr-only { position:absolute; width:1px; height:1px; min-height:0; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media(max-width:360px) { .error { padding-left:0; } }
     @media(prefers-reduced-motion:reduce) { .thumb { transition:none; } }
   `;
 }

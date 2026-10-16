@@ -66,7 +66,7 @@ export function installHomeExtension({ registry = globalThis.customElements, roo
   const history = [];
   const warnings = new Set();
   const cache = new WeakMap();
-  const state = { version: "0.2.0", status: "waiting", history };
+  const state = { version: "0.2.1", status: "waiting", history };
   owner[INSTALL_KEY] = state;
   const note = message => {
     if (warnings.has(message)) return;

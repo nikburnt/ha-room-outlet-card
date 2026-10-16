@@ -39,6 +39,8 @@ async page => {
   await toggle.click();
   assert(await toggle.getAttribute("aria-checked")==="true","Service acceptance is not confirmation");
   assert(await toggle.isEnabled(),"Pending command does not lock control");
+  assert(!(await living.locator(".status").evaluate(element => element.classList.contains("sr-only"))),"Pending feedback stays visible in the compact layout");
+  assert((await living.locator(".status").textContent()).includes("Ждём состояние"),"Pending state is explained");
   await page.waitForTimeout(10200);
   assert((await living.getByRole("alert").textContent()).includes("Состояние не подтвердилось"),"Confirmation timeout");
   await page.evaluate(() => window.demo.setState("switch.living_room_tv_outlet","off"));

@@ -24,6 +24,10 @@ and no top-level `name`, there is no redundant room heading inside the card.
 Put the room name in the dashboard section heading, outside the outlet cards.
 Existing multi-outlet configurations remain supported for compatibility.
 
+The compact layout places both readings below the name. The toggle indicates
+normal On/Off state without a repeated visible label; accessible state, pending
+feedback, unknown/unavailable states and errors remain available.
+
 Every item requires explicit `entity` (switch), `power` (sensor) and `energy`
 (sensor). `name` and `icon` are optional item overrides; a top-level `name` adds
 an optional card heading. The visual editor supports entity selection and row ordering. No devices
@@ -134,3 +138,4 @@ never patch a live Home Assistant bundle.
 `?home&bootstrap` additionally tests the global loader. These are mocked previews,
 not proof of an authenticated live Home render. Browser checks for this path
 are in `tests/home-browser-check.mjs`.
+Compact sizing and status checks are in `tests/compact-browser-check.mjs`.

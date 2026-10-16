@@ -7,6 +7,8 @@
 - Deploy one card per outlet, with room names as unframed section headings.
   Omit a top-level name for single-outlet cards to avoid a repeated card heading.
   Retain existing multi-outlet configuration support for compatibility.
+- Keep the default outlet layout compact: readings below the name, no repeated
+  visible On/Off label. Preserve accessible state and visible pending/fault states.
 - Send commands only on user action and only to the exact configured switch.
   Never add room-wide shutdown or test real outlets by switching them.
 - Keep relay availability independent from the two measurement sensors.
